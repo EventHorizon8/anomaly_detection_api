@@ -1,11 +1,8 @@
 import os
 import pickle
-
-from pyod.models.iforest import IForest
-
-import pickle
 import numpy as np
 
+from pyod.models.iforest import IForest
 from app.utils import plot_roc
 
 import settings
@@ -41,6 +38,10 @@ class IForestModel(object):
         with open(filename, 'wb') as f:
             pickle.dump(self.clf, f)
             print("Pickled classifier at {}".format(filename))
+
+    def model_by_pickle(self):
+        filename = os.path.join("data/models", f"{self.name}_{settings.SettingsConfig.SEED}.pth")
+        self.clf = pickle.load(open(filename, 'rb'))
 
     def train(self, epoch, dataset):
         train_loss = 0
