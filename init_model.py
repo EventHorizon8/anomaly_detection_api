@@ -37,8 +37,7 @@ def init_model():
 
         # Save best model
         if len(val_loss_log) == 0 or val_loss < min(val_loss_log):
-            filename = os.path.join("data/models", f"{model.name}_{settings.SettingsConfig.SEED}.pth")
-            pickle.dump(model, open(filename, 'wb'))
+            model.pickle_clf()
         # Early stopping on validation loss
         if len(val_loss_log[-settings.SettingsConfig.TRAINING_EPOCH_STOP:]) >= settings.SettingsConfig.TRAINING_EPOCH_STOP and val_loss >= max(
                 val_loss_log[-settings.SettingsConfig.TRAINING_EPOCH_STOP:]):

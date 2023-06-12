@@ -1,3 +1,6 @@
+import os
+import pickle
+
 from pyod.models.iforest import IForest
 
 import pickle
@@ -31,12 +34,13 @@ class IForestModel(object):
     def predict(self, X):
         return self.clf.predict(X)
 
-    def pickle_clf(self, path='data/models/ifor_{}.pkl'.format(settings.SettingsConfig.SEED)):
+    def pickle_clf(self):
         """Saves the trained classifier for future use.
         """
-        with open(path, 'wb') as f:
+        filename = os.path.join("data/models", f"{self.name}_{settings.SettingsConfig.SEED}.pth")
+        with open(filename, 'wb') as f:
             pickle.dump(self.clf, f)
-            print("Pickled classifier at {}".format(path))
+            print("Pickled classifier at {}".format(filename))
 
     def train(self, epoch, dataset):
         train_loss = 0
