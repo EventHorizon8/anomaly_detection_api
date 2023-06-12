@@ -59,7 +59,14 @@ def create_app():
         predict_dataset.labels[predict_dataset.labels == 1] = -1
         predict_dataset.labels[predict_dataset.labels == 0] = 1
         metric_tuple = precision_recall_fscore_support(predict_dataset.labels, outlier_preds, average="weighted", pos_label=-1)
-        print(np.column_stack((data_logs, outlier_preds)))
+
+        if request.args.get('save') == '1':
+            results_with_scores = np.column_stack((data_logs, outlier_score))
+            results_with_scores = np.column_stack((results_with_scores, outlier_preds))
+            filename = os.path.join("data/stat", f"{model.name}_testing_data_results{datetime.datetime.now().strftime('%Y_%m_%d_%H%M%S')}.csv")
+            pd.DataFrame(results_with_scores, columns=list(data_logs.columns) + list(['outlier_score', 'outlier_preds'])).to_csv(filename)
+
+
         return {
             "roc_auc_score": roc_auc_score(predict_dataset.labels.numpy(), outlier_preds),
             "time_to_complete": str(end - start),

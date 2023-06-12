@@ -24,5 +24,6 @@ class BaseDataset(TensorDataset):
         # Extract values
         self.data = torch.as_tensor(data.values, dtype=torch.int64)
         self.labels = torch.as_tensor(labels.values, dtype=torch.int64)
-
+        self.columns = ["processId", "parentProcessId", "userId", "mountNamespace", "eventId", "argsNum", "returnValue"]
+        self.columns_labels = ["sus"]
         super().__init__(self.data, self.labels)
