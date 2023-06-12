@@ -2,34 +2,34 @@ import os
 import pickle
 import numpy as np
 
-from pyod.models.iforest import IForest
+from sklearn.decomposition import PCA
+from sklearn.ensemble import IsolationForest
+
 from app.utils import plot_roc
 
 import settings
 
 
-class IForestModel(object):
+class WhitenedBenchmark():
 
     def __init__(self):
         """Init IsolationForest
-        Attributes:
-            clf: pyod classifier model
         """
         self.name = 'ifor'
-        self.clf = IForest(contamination=settings.SettingsConfig.OUTLIER_FRACTION, random_state=settings.SettingsConfig.RANDOM_STATE)
+        self.clf = IsolationForest(contamination=settings.SettingsConfig.OUTLIER_FRACTION,
+                                   random_state=settings.SettingsConfig.RANDOM_STATE)
+        self.pca = PCA(whiten=True)
 
     def decision_function(self, X):
-        return self.clf.decision_function(X)
+        return self.clf.decision_function(self.pca.transform(X))
 
     def fit(self, X):
-        self.clf = self.clf.fit(X)
+        self.pca = self.pca.fit(X)
+        self.clf = self.clf.fit(self.pca.transform(X))
 
     def predict_proba(self, X):
         y_proba = self.clf.predict_proba(X)
         return y_proba[:, 1]
-
-    def predict(self, X):
-        return self.clf.predict(X)
 
     def pickle_clf(self):
         """Saves the trained classifier for future use.
@@ -41,7 +41,7 @@ class IForestModel(object):
 
     def model_by_pickle(self):
         filename = os.path.join("data/models", f"{self.name}_{settings.SettingsConfig.SEED}.pth")
-        self.clf = pickle.load(open(filename, 'rb'))
+        return pickle.load(open(filename, 'rb'))
 
     def train(self, epoch, dataset):
         train_loss = 0

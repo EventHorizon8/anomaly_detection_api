@@ -2,6 +2,8 @@ import pandas as pd
 import torch
 from torch.utils.data import TensorDataset
 
+from app.utils import prepare_data, prepare_tensor_data
+
 
 class BaseDataset(TensorDataset):
     """
@@ -11,19 +13,19 @@ class BaseDataset(TensorDataset):
         self.name = name
         # Select columns and perform pre-processing
         labels = pd.DataFrame(data[["sus"]])
-        data = pd.DataFrame(
-            data[["processId", "parentProcessId", "userId", "mountNamespace", "eventId", "argsNum", "returnValue"]])
-        data["processId"] = data["processId"].map(lambda x: 0 if x in [0, 1, 2] else 1)  # Map to OS/not OS
-        data["parentProcessId"] = data["parentProcessId"].map(lambda x: 0 if x in [0, 1, 2] else 1)  # Map to OS/not OS
-        data["userId"] = data["userId"].map(lambda x: 0 if x < 1000 else 1)  # Map to OS/not OS
-        data["mountNamespace"] = data["mountNamespace"].map(
-            lambda x: 0 if x == 4026531840 else 1)  # Map to mount access to mnt/ (all non-OS users) /elsewhere
-        data["eventId"] = data["eventId"]  # Keep eventId values (requires knowing max value)
-        data["returnValue"] = data["returnValue"].map(
-            lambda x: 0 if x == 0 else (1 if x > 0 else 2))  # Map to success/success with value/error
+        data = prepare_data(data)
         # Extract values
-        self.data = torch.as_tensor(data.values, dtype=torch.int64)
-        self.labels = torch.as_tensor(labels.values, dtype=torch.int64)
+        self.data = prepare_tensor_data(data)
+        self.labels = prepare_tensor_data(labels)
         self.columns = ["processId", "parentProcessId", "userId", "mountNamespace", "eventId", "argsNum", "returnValue"]
         self.columns_labels = ["sus"]
         super().__init__(self.data, self.labels)
+
+    def get_input_shape(self):  # note that does not return actual shape, but is used to configure model for categorical data
+        num_classes = self.data.max(dim=0)[0] + 1
+        num_classes[4] = 1011  # Manually set eventId range as 0-1011 (1010 is max value)
+        return num_classes
+
+    def get_distribution(self):
+        return 'categorical'
+
