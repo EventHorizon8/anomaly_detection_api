@@ -5,7 +5,7 @@ from flask import Flask, request
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_pyfile('settings.py')
+    app.config.from_object('settings.SettingsConfig')
 
     @app.post('/logs')
     def logs_add_post():
