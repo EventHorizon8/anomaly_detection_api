@@ -1,3 +1,4 @@
+import json
 import os
 
 import pandas as pd
@@ -35,7 +36,10 @@ def create_app():
         results_with_scores = np.column_stack((data_logs, outlier_preds))
 
         results_with_scores = np.column_stack((results_with_scores, outlier_score))
-        return pd.DataFrame(results_with_scores, columns=list(data_logs.columns) + list(['outlier_preds', 'outlier_anomaly_score'])).to_json(orient="records")
+        result = pd.DataFrame(results_with_scores, columns=list(data_logs.columns) + list(
+            ['outlier_preds', 'outlier_anomaly_score'])).to_json(orient="records")
+
+        return {"logs": json.loads(result)}
 
     @app.get('/test')
     def logs_test():
@@ -47,15 +51,18 @@ def create_app():
         model = WhitenedBenchmark().model_by_pickle()
         # Run model on testing dataset
         outlier_preds = model.predict(predict_dataset.data)
-         # Run model on testing dataset
+        # Run model on testing dataset
         end = datetime.datetime.now()
 
-        metric_tuple = precision_recall_fscore_support(predict_dataset.labels, outlier_preds, average="weighted", pos_label=1)
+        metric_tuple = precision_recall_fscore_support(predict_dataset.labels, outlier_preds, average="weighted",
+                                                       pos_label=1)
 
         if request.args.get('save') == '1':
             results_with_scores = np.column_stack((data_logs, outlier_preds))
-            filename = os.path.join("data/stat", f"testing_data_results{datetime.datetime.now().strftime('%Y_%m_%d_%H%M%S')}.csv")
-            pd.DataFrame(results_with_scores, columns=list(data_logs.columns) + list(['outlier_preds'])).to_csv(filename)
+            filename = os.path.join("data/stat",
+                                    f"testing_data_results{datetime.datetime.now().strftime('%Y_%m_%d_%H%M%S')}.csv")
+            pd.DataFrame(results_with_scores, columns=list(data_logs.columns) + list(['outlier_preds'])).to_csv(
+                filename)
 
         return {
             "roc_auc_score": roc_auc_score(predict_dataset.labels.numpy(), outlier_preds),
