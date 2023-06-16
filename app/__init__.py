@@ -11,7 +11,7 @@ from sklearn.metrics import roc_auc_score, precision_recall_fscore_support
 
 import settings
 from app.dataset import BaseDataset
-from app.model import WhitenedBenchmark
+from app.model import ModelWrapper
 from app.utils import prepare_data, prepare_tensor_data
 
 
@@ -27,7 +27,7 @@ def create_app():
 
         predict_dataset = prepare_tensor_data(prepare_data(data_logs))
         # Load the models
-        model = WhitenedBenchmark().model_by_pickle()
+        model = ModelWrapper().model_by_pickle()
         # Run model on testing dataset
         outlier_preds = model.predict(predict_dataset)
         outlier_score = model.decision_function(predict_dataset)
@@ -48,7 +48,7 @@ def create_app():
         data_logs = pd.read_csv(filename)
         predict_dataset = BaseDataset(data_logs)
         # Load the models
-        model = WhitenedBenchmark().model_by_pickle()
+        model = ModelWrapper().model_by_pickle()
         # Run model on testing dataset
         outlier_preds = model.predict(predict_dataset.data)
         # Run model on testing dataset

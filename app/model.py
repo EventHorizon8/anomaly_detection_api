@@ -2,30 +2,26 @@ import os
 import pickle
 import numpy as np
 
-from sklearn.decomposition import PCA
-from sklearn.ensemble import IsolationForest
+from pyod.models.iforest import IForest
 
 from app.utils import plot_roc
 
 import settings
 
 
-class WhitenedBenchmark():
+class ModelWrapper():
 
     def __init__(self):
-        """Init IsolationForest
+        """Init Model from settings
         """
-        self.name = 'ifor'
-        self.clf = IsolationForest(contamination=settings.SettingsConfig.OUTLIER_FRACTION,
-                                   random_state=settings.SettingsConfig.RANDOM_STATE)
-        self.pca = PCA(whiten=True)
+        self.name = settings.SettingsConfig.MODEL_NAME
+        self.clf = settings.SettingsConfig.MODEL
 
     def decision_function(self, X):
-        return self.clf.decision_function(self.pca.transform(X))
+        return self.clf.decision_function(X)
 
     def fit(self, X):
-        self.pca = self.pca.fit(X)
-        self.clf = self.clf.fit(self.pca.transform(X))
+        self.clf = self.clf.fit(X)
 
     def predict_proba(self, X):
         y_proba = self.clf.predict_proba(X)

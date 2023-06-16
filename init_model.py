@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import settings
-from app.model import WhitenedBenchmark
+from app.model import ModelWrapper
 import pandas as pd
 import tqdm
 
@@ -11,7 +11,7 @@ from app.dataset import BaseDataset
 def init_model():
     start = datetime.now()
     print("Start: ", start)
-    model = WhitenedBenchmark()
+    model = ModelWrapper()
 
     data = pd.read_csv("data/raw_logs/labelled_training_data.csv")
     val_data = pd.read_csv("data/raw_logs/labelled_validation_data.csv")
