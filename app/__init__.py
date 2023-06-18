@@ -37,7 +37,7 @@ def create_app():
 
         results_with_scores = np.column_stack((results_with_scores, outlier_score))
         result = pd.DataFrame(results_with_scores, columns=list(data_logs.columns) + list(
-            ['outlier_preds', 'outlier_anomaly_score'])).to_json(orient="records")
+            ['anomalyDetected', 'outlierAnomalyScore'])).to_json(orient="records")
 
         return {"logs": json.loads(result)}
 
@@ -65,11 +65,11 @@ def create_app():
                 filename)
 
         return {
-            "roc_auc_score": roc_auc_score(predict_dataset.labels.numpy(), outlier_preds),
-            "time_to_complete": str(end - start),
+            "rocAucScore": roc_auc_score(predict_dataset.labels.numpy(), outlier_preds),
+            "timeToComplete": str(end - start),
             "precision": metric_tuple[0],
             "recall": metric_tuple[1],
-            "f1-score": metric_tuple[2],
+            "f1Score": metric_tuple[2],
         }
 
     return app
